@@ -1,4 +1,4 @@
-# Using a Transformer Imputer for Robust Prognostics
+# Self-Supervised Transformer Imputation for Robust Prognostics
 Project for Vanderbilt University's Special Topics in Deep Learning course, Spring 2023
 
 Austin Coursey and Abel Diaz-Gonzalez
