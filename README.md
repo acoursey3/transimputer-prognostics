@@ -17,5 +17,5 @@ Being able to determine how long a component or system has before it fails, the 
 - [ ] Validate imputation pretraining
 - [ ] Run prognostics training
 - [ ] Assess prognostics performance
-- [ ] Write literature review
+- [ X ] Write literature review
 - [ ] Write report
