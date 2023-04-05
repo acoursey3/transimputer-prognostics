@@ -9,7 +9,8 @@ Being able to determine how long a component or system has before it fails, the 
 
 ## TODO
 
-- [ ] Decide on datasets
+- [x] Decide on datasets
+- [x] Preprocess data
 - [ ] Design data augmentation algorithm
 - [ ] Design Transformer architecture and decide which stage to extract
 - [ ] Structure files and experiments
