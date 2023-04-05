@@ -28,7 +28,7 @@ class CMAPSSTrainDataset(Dataset):
         return torch.from_numpy(sensors), torch.from_numpy(rul)
     
     def load_split_datasets(self):
-        dataPath = './CMAPSSData'
+        dataPath = '../CMAPSSData'
         id_col = ['id']
         cycle_col = ['cycle']
         setting_cols = ['setting1', 'setting2', 'setting3']
@@ -152,7 +152,7 @@ class CMAPSSTestDataset(Dataset):
         return torch.from_numpy(sensors), torch.from_numpy(rul)
     
     def load_split_datasets(self):
-        dataPath = './CMAPSSData'
+        dataPath = '../CMAPSSData'
         id_col = ['id']
         cycle_col = ['cycle']
         setting_cols = ['setting1', 'setting2', 'setting3']
