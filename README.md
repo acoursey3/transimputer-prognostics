@@ -11,7 +11,7 @@ Being able to determine how long a component or system has before it fails, the 
 
 - [x] Decide on datasets
 - [x] Preprocess data
-- [ ] Design data augmentation algorithm
+- [x] Design data augmentation algorithm
 - [ ] Design Transformer architecture and decide which stage to extract
 - [ ] Structure files and experiments
 - [ ] Run imputation pretraining
