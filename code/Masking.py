@@ -79,5 +79,9 @@ def mask_input(batched_data, only_mask=True):
             masked = mask_blocks(batched_data)
         else:
             masked = batched_data
+            
+    # safety check to not return null
+    if len(masked) == 0:
+        mask_input(batched_data, only_mask)
     
     return masked

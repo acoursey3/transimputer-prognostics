@@ -1,3 +1,4 @@
 .ipynb_checkpoints
 CMAPSSData/
 __pycache__
+*.pt
