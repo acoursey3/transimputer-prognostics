@@ -1,13 +1,23 @@
 import torch
 import numpy as np
 
+import numpy as np
+import torch
+
 def mask_random(batched_data):
     masked = batched_data.clone()
     percent_missing = np.random.randint(30, 60) / 100
-    random_mask = (torch.FloatTensor(masked.shape).uniform_() > percent_missing)
 
-    masked[random_mask] *= -1
-    masked[masked < 0] = -1
+    # Find indices of the padded values
+    padded_indices = (masked == 0).all(dim=2)
+
+    # Generate random masks for true values only
+    true_masks = torch.rand(batched_data.shape) > percent_missing
+    true_masks[padded_indices] = False
+
+    # Mask the true values and leave padded values as 0
+    masked[true_masks] = -1
+
     return masked
 
 def mask_intermittently(batched_data):
@@ -20,8 +30,6 @@ def mask_intermittently(batched_data):
     masked[:, :, cols] = (masked[:, :, cols] * np.expand_dims(np.expand_dims(checkerboard_mask, 0), 2))
     masked[masked < 0] = -1
     return masked
-
-import torch
 
 # Written by ChatGPT
 def mask_blocks(batched_data):
@@ -37,21 +45,21 @@ def mask_blocks(batched_data):
         seq = x[i]
 
         # Determine the length of the non-padded sequence
-        non_padded_len = torch.nonzero(seq[:, 0]).shape[0]
+        non_padded_len = torch.nonzero(seq[:,2]).shape[0]
 
         # Randomly select the number of blocks to mask (1-5)
-        num_blocks = torch.randint(1, 6, size=(1,)).item()
+        num_blocks = torch.randint(1, 3, size=(1,)).item()
 
         # Iterate over each block to mask
         for j in range(num_blocks):
             # Randomly select the length of the block (5-20)
-            block_len = torch.randint(5, 21, size=(1,)).item()
+            block_len = torch.randint(0, int(non_padded_len/num_blocks)+1, size=(1,)).item()
 
             if non_padded_len - block_len + 1 < 1:
                 continue
             # Randomly select the start index of the block
             start_index = torch.randint(0, non_padded_len - block_len + 1, size=(1,)).item()
-
+                
             # Mask the selected block
             mask[i, start_index:start_index + block_len] = True
 
@@ -61,27 +69,27 @@ def mask_blocks(batched_data):
     return x
 
 def mask_input(batched_data, only_mask=True):
-    eps = np.random.rand()
+    min_size = 5
     
-    if only_mask:
-        if eps > 0.66:
-            masked = mask_random(batched_data)
-        elif eps > 0.33:
-            masked = mask_intermittently(batched_data)
-        else:
-            masked = mask_blocks(batched_data)
-    else:    
-        if eps > 0.75:
-            masked = mask_random(batched_data)
-        elif eps > 0.5:
-            masked = mask_intermittently(batched_data)
-        elif eps > 0.25:
-            masked = mask_blocks(batched_data)
-        else:
-            masked = batched_data
+    masked_data = []
+    batch_size = batched_data.shape[0]
+    for i in range(batch_size):
+        
+        sample = batched_data[i]
+        eps = np.random.rand()
+
+        if torch.nonzero(sample[:,2]).shape[0] < min_size:
+            masked_data.append(sample)
+            continue
             
-    # safety check to not return null
-    if len(masked) == 0:
-        mask_input(batched_data, only_mask)
+        if eps > 0.66:
+            masked = mask_random(sample.unsqueeze(0))
+        elif eps > 0.33:
+            masked = mask_intermittently(sample.unsqueeze(0))
+        else:
+            masked = mask_blocks(sample.unsqueeze(0))
+            
+        masked_data.append(masked.squeeze(0))
+            
     
-    return masked
+    return torch.stack(masked_data)
