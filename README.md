@@ -1,7 +1,7 @@
 # Self-Supervised Transformer Imputation for Reliable Prognostics Under Missing Data
 Project for Vanderbilt University's Special Topics in Deep Learning course, Spring 2023
 
-Austin Coursey and Abel Diaz-Gonzalez
+Austin Coursey and Abel Diaz-Gonzalez (Hi)
 
 ## Abstract
 
