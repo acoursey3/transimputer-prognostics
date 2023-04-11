@@ -235,3 +235,15 @@ def get_dataloaders(batch, dataset_no=1):
     testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
 
     return trainloader, testloader
+
+def get_new_dataloaders(batch, dataset_no=1):
+    traindata = CMAPSSTrainDataset(dataset_no)
+    trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
+    
+    train_size = int(0.8 * len(traindata))
+    test_size = len(traindata) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(traindata, [train_size, test_size])
+    
+    trainloader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
+    testloader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
+    return trainloader, testloader
