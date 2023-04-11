@@ -20,15 +20,28 @@ def mask_random(batched_data):
 
     return masked
 
-def mask_intermittently(batched_data):
-    masked = batched_data.clone()
-    n_cols = np.random.randint(0, batched_data.shape[2])
-    cols = np.random.choice(list(range(n_cols)), n_cols, replace=False)
-    checkerboard_mask = np.ones(masked.shape[1])
-    checkerboard_mask[0::2] = -1
+def mask_intermittently(unbatched_data):
+    unbatched_data.squeeze(0)
+    masked = unbatched_data.clone().float()
 
-    masked[:, :, cols] = (masked[:, :, cols] * np.expand_dims(np.expand_dims(checkerboard_mask, 0), 2))
-    masked[masked < 0] = -1
+    # Create a mask for the padded values
+    padded_indices = (masked == 0)
+
+    # Select a random subset of columns to mask
+    n_cols = np.random.randint(0, unbatched_data.shape[1])
+    cols = np.random.choice(list(range(unbatched_data.shape[1])), n_cols, replace=False)
+
+    # Create a checkerboard mask
+    checkerboard_mask = np.ones(masked.shape[0])
+    checkerboard_mask[0::2] = 0
+    checkerboard_mask = checkerboard_mask.astype(bool)
+
+    # Apply the mask to the selected columns
+    masked[checkerboard_mask] = -1
+
+    # Set the padded values to 0
+    masked[padded_indices] = 0
+
     return masked
 
 # Written by ChatGPT

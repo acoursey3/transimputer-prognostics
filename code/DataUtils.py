@@ -7,6 +7,7 @@ import torch
 class CMAPSSTrainDataset(Dataset):
     def __init__(self, dataset_no=1):
         ragged_data = []
+        self.scaler = None
         X_train, y_train = self.load_split_datasets(dataset_no)
         for i in range(len(X_train)):
             for j in range(len(X_train[i])):
@@ -44,6 +45,9 @@ class CMAPSSTrainDataset(Dataset):
 
         return sequenced_data
     
+    def get_scaler(self):
+        return self.scaler
+    
     def load_split_datasets(self, dataset_no):
         dataPath = '../CMAPSSData'
         id_col = ['id']
@@ -79,11 +83,11 @@ class CMAPSSTrainDataset(Dataset):
         
         train_datasets, train_lifecycles = [], []
         
-        scaler = MinMaxScaler()
+        self.scaler = MinMaxScaler()
         setNumber = dataset_no
         train, trainLifeCycles = loadTrainData(setNumber, decrease_threshold)
         target = train['RUL'].copy()
-        transformed_train = scaler.fit_transform(train)
+        transformed_train = self.scaler.fit_transform(train)
         train = pd.DataFrame(transformed_train, columns=train.columns, index=train.index)
         train['RUL'] = target
         train_datasets.append(train)
@@ -113,8 +117,9 @@ class CMAPSSTrainDataset(Dataset):
     
     
 class CMAPSSTestDataset(Dataset):
-    def __init__(self, size, dataset_no=1):
+    def __init__(self, size, dataset_no=1, scaler=None):
         ragged_data = []
+        self.scaler = scaler
         X_test, y_test = self.load_split_datasets(dataset_no)
         for i in range(len(X_test)):
             for j in range(len(X_test[i])):
@@ -190,12 +195,10 @@ class CMAPSSTestDataset(Dataset):
             return data, lifeCycles
         
         test_datasets, test_lifecycles = [], []
-        
-        scaler = MinMaxScaler()
 
         test, testLifeCycles = loadTestData(setNumber, decrease_threshold)
         target = test['RUL'].copy()
-        transformed_test = scaler.fit_transform(test)
+        transformed_test = self.scaler.transform(test)
         test = pd.DataFrame(transformed_test, columns=test.columns, index=test.index)
         test['RUL'] = target
         test_datasets.append(test)
@@ -228,7 +231,7 @@ def get_dataloaders(batch, dataset_no=1):
     trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
     size = next(enumerate(trainloader))[1][0].shape[1]
     
-    testdata = CMAPSSTestDataset(size, dataset_no)
+    testdata = CMAPSSTestDataset(size, dataset_no, traindata.get_scaler())
     testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
 
     return trainloader, testloader
