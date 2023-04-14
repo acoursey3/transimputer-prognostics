@@ -12,11 +12,11 @@ Being able to determine how long a component or system has before it fails, the 
 - [x] Decide on datasets
 - [x] Preprocess data
 - [x] Design data augmentation algorithm
-- [ ] Design Transformer architecture and decide which stage to extract
-- [ ] Structure files and experiments
-- [ ] Run imputation pretraining
-- [ ] Validate imputation pretraining
-- [ ] Run prognostics training
-- [ ] Assess prognostics performance
+- [x] Design Transformer architecture and decide which stage to extract
+- [x] Structure files and experiments
+- [x] Run imputation pretraining
+- [x] Validate imputation pretraining
+- [x] Run prognostics training
+- [x] Assess prognostics performance
 - [x] Write literature review
 - [ ] Write report
