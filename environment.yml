@@ -1,7 +1,7 @@
 name: transimputer-prognostics
 channels:
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
@@ -19,7 +19,7 @@ dependencies:
   - brotli=1.0.9=h166bdaf_7
   - brotli-bin=1.0.9=h166bdaf_7
   - bzip2=1.0.8=h7b6447c_0
-  - ca-certificates=2022.12.7=ha878542_0
+  - ca-certificates=2023.01.10=h06a4308_0
   - cffi=1.15.1=py311h5eee18b_3
   - colorama=0.4.6=pyhd8ed1ab_0
   - comm=0.1.2=py311h06a4308_0
@@ -48,6 +48,7 @@ dependencies:
   - ipython_genutils=0.2.0=pyhd3eb1b0_1
   - jedi=0.18.1=py311h06a4308_1
   - jinja2=3.1.2=py311h06a4308_0
+  - joblib=1.1.1=py311h06a4308_0
   - jpeg=9e=h166bdaf_1
   - jsonschema=4.17.3=py311h06a4308_0
   - jupyter_client=8.1.0=py311h06a4308_0
@@ -148,6 +149,7 @@ dependencies:
   - qt-webengine=5.15.9=hd2b0992_4
   - qtwebkit=5.212=h4eab89a_4
   - readline=8.2=h5eee18b_0
+  - scikit-learn=1.2.2=py311h6a678d5_0
   - scipy=1.9.3=py311hc206e33_1
   - seaborn=0.11.2=pyhd3eb1b0_0
   - send2trash=1.8.0=pyhd3eb1b0_1
@@ -159,6 +161,7 @@ dependencies:
   - sqlite=3.41.2=h5eee18b_0
   - stack_data=0.2.0=pyhd3eb1b0_0
   - terminado=0.17.1=py311h06a4308_0
+  - threadpoolctl=2.2.0=pyh0d69192_0
   - tinycss2=1.2.1=py311h06a4308_0
   - tk=8.6.12=h1ccaba5_0
   - toml=0.10.2=pyhd8ed1ab_0
@@ -177,4 +180,4 @@ dependencies:
   - zeromq=4.3.4=h2531618_0
   - zlib=1.2.13=h5eee18b_0
   - zstd=1.5.2=ha4553b6_0
-prefix: /home/austinc/.conda/envs/transimputer-prognostics
+prefix: /home/courseac/miniconda3/envs/transimputer-prognostics
