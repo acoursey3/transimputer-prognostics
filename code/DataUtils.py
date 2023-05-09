@@ -363,11 +363,11 @@ class NCMAPSSTestDataset(NCMAPSSTrainDataset):
         
         return lengths[self.ds_no]
     
-    def get_ncmapss_dataloaders(ds_no, n_timesteps, batch):
-        traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
-        trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
+def get_ncmapss_dataloaders(ds_no, n_timesteps, batch):
+    traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
+    trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
 
-        testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
-        testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
+    testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
+    testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
 
-        return trainloader, testloader
+    return trainloader, testloader
