@@ -3,6 +3,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
 import torch
+from pickle import load
+import h5py
 
 class CMAPSSTrainDataset(Dataset):
     def __init__(self, dataset_no=1):
@@ -226,7 +228,7 @@ class CMAPSSTestDataset(Dataset):
 
         return split_data, ruls
     
-def get_dataloaders(batch, dataset_no=1):
+def get_cmapss_dataloaders(batch, dataset_no=1):
     traindata = CMAPSSTrainDataset(dataset_no)
     trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
     size = next(enumerate(trainloader))[1][0].shape[1]
@@ -236,7 +238,7 @@ def get_dataloaders(batch, dataset_no=1):
 
     return trainloader, testloader
 
-def get_new_dataloaders(batch, dataset_no=1):
+def get_cmapss_dataloaders_new(batch, dataset_no=1):
     traindata = CMAPSSTrainDataset(dataset_no)
     trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
     
@@ -247,3 +249,125 @@ def get_new_dataloaders(batch, dataset_no=1):
     trainloader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
     testloader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
     return trainloader, testloader
+
+class NCMAPSSTrainDataset(Dataset):
+    def __init__(self, ds_no, timesteps=10):
+        self.ds_no = ds_no
+        self.fileloc = self.get_fileloc(ds_no)
+        self.timesteps = timesteps
+        self.scaler = self.get_scaler(ds_no)
+        
+    
+    def __getitem__(self, index):
+        start = index - self.timesteps + 1
+        if start < 0:
+            start = 0
+        indices = list(range(start, index+1))
+        
+        X_train, unit, A_dev, Y_dev = self.get_data(indices, index)
+        X_train = self.scaler.transform(X_train)
+        X_train[:,42] = A_dev[:,0]
+        n_pad = self.timesteps - X_train.shape[0]
+        X_train = np.pad(X_train, ((n_pad, 0),(0,0)), mode='constant')
+        
+        for i, row in enumerate(X_train):
+            curr_unit = row[42] # ensure column 42 contains the unit number
+            if curr_unit != unit and not np.all(row==0):
+                print(curr_unit, unit)
+                print("units dont match")
+                X_train[i] = np.zeros_like(row)
+        
+        return X_train, Y_dev
+    
+    def get_data(self, indices, index):
+        with h5py.File(self.fileloc, 'r') as hdf:
+            # Development set
+            W_dev = np.array(hdf.get('W_dev')[indices])
+            X_s_dev = np.array(hdf.get('X_s_dev')[indices])
+            X_v_dev = np.array(hdf.get('X_v_dev')[indices])
+            T_dev = np.array(hdf.get('T_dev')[indices])
+            Y_dev = np.array(hdf.get('Y_dev')[index])
+            A_dev = np.array(hdf.get('A_dev')[indices])
+            
+            unit = A_dev[-1:, 0]
+            
+        X_train = np.concatenate((W_dev, X_s_dev, X_v_dev, T_dev, A_dev), axis=1)
+        
+        return X_train, unit, A_dev, Y_dev
+    
+    def __len__(self):
+        lengths = {
+            1: 4906636,
+            2: 5263447,
+            3: 5571277,
+            4: 6377452,
+            5: 4350606,
+            6: 4257209,
+            7: 4350176,
+            8: 4885389,
+            9: 4299918
+        }
+        
+        return lengths[self.ds_no]
+    
+    def get_fileloc(self, ds_no):
+        locations = {
+            1: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS01-005.h5',
+            2: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS02-006.h5',
+            3: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS03-012.h5',
+            4: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS04.h5',
+            5: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS05.h5',
+            6: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS06.h5',
+            7: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS07.h5',
+            8: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS08a-009.h5',
+            9: '/data/courseac/N-CMAPSS/data_set/N-CMAPSS_DS08c-008.h5',
+        }
+        
+        return locations[ds_no]
+    
+    def get_scaler(self, ds_no):
+        return load(open('./scalers/scaler' + str(ds_no) + '.pkl', 'rb'))
+    
+class NCMAPSSTestDataset(NCMAPSSTrainDataset):
+    def __init__(self, ds_no, timesteps=10):
+        super().__init__(ds_no,timesteps)
+    
+    def get_data(self, indices, index):
+        with h5py.File(self.fileloc, 'r') as hdf:
+            # Development set
+            W_dev = np.array(hdf.get('W_test')[indices])
+            X_s_dev = np.array(hdf.get('X_s_test')[indices])
+            X_v_dev = np.array(hdf.get('X_v_test')[indices])
+            T_dev = np.array(hdf.get('T_test')[indices])
+            Y_dev = np.array(hdf.get('Y_test')[index])
+            A_dev = np.array(hdf.get('A_test')[indices])
+            
+            unit = A_dev[-1:, 0]
+            
+        X_train = np.concatenate((W_dev, X_s_dev, X_v_dev, T_dev, A_dev), axis=1)
+        
+        return X_train, unit, A_dev, Y_dev
+    
+    def __len__(self):
+        lengths = {
+            1: 2735232,
+            2: 1253743,
+            3: 4251560,
+            4: 3602561,
+            5: 2562046,
+            6: 2522447,
+            7: 2869786,
+            8: 3722997,
+            9: 2117819
+        }
+        
+        return lengths[self.ds_no]
+    
+    def get_ncmapss_dataloaders(ds_no, n_timesteps, batch):
+        traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
+        trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
+
+        testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
+        testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
+
+        return trainloader, testloader
