@@ -273,8 +273,6 @@ class NCMAPSSTrainDataset(Dataset):
         for i, row in enumerate(X_train):
             curr_unit = row[42] # ensure column 42 contains the unit number
             if curr_unit != unit and not np.all(row==0):
-                print(curr_unit, unit)
-                print("units dont match")
                 X_train[i] = np.zeros_like(row)
         
         return X_train, Y_dev
@@ -363,11 +361,11 @@ class NCMAPSSTestDataset(NCMAPSSTrainDataset):
         
         return lengths[self.ds_no]
     
-def get_ncmapss_dataloaders(ds_no, n_timesteps, batch):
+def get_ncmapss_dataloaders(ds_no, n_timesteps, batch, workers=1):
     traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
-    trainloader = DataLoader(traindata, batch_size=batch, shuffle=True)
+    trainloader = DataLoader(traindata, batch_size=batch, shuffle=True, num_workers=workers)
 
     testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
-    testloader = DataLoader(testdata, batch_size=batch, shuffle=False)
+    testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers)
 
     return trainloader, testloader
