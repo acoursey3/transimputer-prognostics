@@ -472,6 +472,6 @@ def get_ncmapss_dataloaders(ds_no, n_timesteps, batch, workers=1, subsampled=Tru
         trainloader = DataLoader(traindata, batch_size=batch, shuffle=True, num_workers=workers)
 
         testdata = SubsampledNCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
-        testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers)
+        testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers) 
 
     return trainloader, testloader
