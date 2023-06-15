@@ -360,12 +360,118 @@ class NCMAPSSTestDataset(NCMAPSSTrainDataset):
         }
         
         return lengths[self.ds_no]
-    
-def get_ncmapss_dataloaders(ds_no, n_timesteps, batch, workers=1):
-    traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
-    trainloader = DataLoader(traindata, batch_size=batch, shuffle=True, num_workers=workers)
 
-    testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
-    testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers)
+class SubsampledNCMAPSSTrainDataset(Dataset):
+    def __init__(self, ds_no, timesteps=10):
+        self.ds_no = ds_no
+        self.fileloc = self.get_fileloc(ds_no)
+        self.timesteps = timesteps
+        self.scaler = self.get_scaler(ds_no)
+        
+    
+    def __getitem__(self, index):
+        start = index - self.timesteps + 1
+        if start < 0:
+            start = 0
+        indices = list(range(start, index+1))
+        
+        X_train, unit, A_dev, Y_dev = self.get_data(indices, index)
+        X_train = self.scaler.transform(X_train)
+        X_train[:,42] = A_dev[:,0]
+        n_pad = self.timesteps - X_train.shape[0]
+        X_train = np.pad(X_train, ((n_pad, 0),(0,0)), mode='constant')
+        
+        for i, row in enumerate(X_train):
+            curr_unit = row[42] # ensure column 42 contains the unit number
+            if curr_unit != unit and not np.all(row==0):
+                X_train[i] = np.zeros_like(row)
+        
+        return X_train, Y_dev
+    
+    def get_data(self, indices, index):
+        with h5py.File(self.fileloc, 'r') as hdf:
+            X_train = np.array(hdf.get('X_train')[indices])
+            Y_dev = np.array(hdf.get('y_train')[index])
+            A_dev = X_train[:, -4:]
+            
+            unit = A_dev[-1:, 0]
+        
+        return X_train, unit, A_dev, Y_dev
+    
+    def __len__(self):
+        lengths = {
+            1: 490663,
+            2: 526344,
+            3: 557127,
+            4: 637745,
+            5: 435060,
+            6: 425720,
+            7: 435017,
+            8: 488538,
+            9: 429991
+        }
+        
+        return lengths[self.ds_no]
+    
+    def get_fileloc(self, ds_no):
+        locations = {
+            1: '/data/courseac/N-CMAPSS/subsampled/ds1.h5',
+            2: '/data/courseac/N-CMAPSS/subsampled/ds2.h5',
+            3: '/data/courseac/N-CMAPSS/subsampled/ds3.h5',
+            4: '/data/courseac/N-CMAPSS/subsampled/ds4.h5',
+            5: '/data/courseac/N-CMAPSS/subsampled/ds5.h5',
+            6: '/data/courseac/N-CMAPSS/subsampled/ds6.h5',
+            7: '/data/courseac/N-CMAPSS/subsampled/ds7.h5',
+            8: '/data/courseac/N-CMAPSS/subsampled/ds8a.h5',
+            9: '/data/courseac/N-CMAPSS/subsampled/ds8c.h5',
+        }
+        
+        return locations[ds_no]
+    
+    def get_scaler(self, ds_no):
+        return load(open('./scalers/scaler' + str(ds_no) + '.pkl', 'rb'))
+    
+class SubsampledNCMAPSSTestDataset(SubsampledNCMAPSSTrainDataset):
+    def __init__(self, ds_no, timesteps=10):
+        super().__init__(ds_no,timesteps)
+    
+    def get_data(self, indices, index):
+        with h5py.File(self.fileloc, 'r') as hdf:
+            X_test = np.array(hdf.get('X_test')[indices])
+            Y_test = np.array(hdf.get('y_test')[index])
+            A_test = X_test[:, -4:]
+            
+            unit = A_test[-1:, 0]
+        
+        return X_test, unit, A_test, Y_test
+    
+    def __len__(self):
+        lengths = {
+            1: 273523,
+            2: 125374,
+            3: 425156,
+            4: 360256,
+            5: 256204,
+            6: 252244,
+            7: 286978,
+            8: 372299,
+            9: 211781
+        }
+        
+        return lengths[self.ds_no]
+    
+def get_ncmapss_dataloaders(ds_no, n_timesteps, batch, workers=1, subsampled=True):
+    if not subsampled:
+        traindata = NCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
+        trainloader = DataLoader(traindata, batch_size=batch, shuffle=True, num_workers=workers)
+
+        testdata = NCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
+        testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers)
+    else: 
+        traindata = SubsampledNCMAPSSTrainDataset(ds_no, timesteps=n_timesteps)
+        trainloader = DataLoader(traindata, batch_size=batch, shuffle=True, num_workers=workers)
+
+        testdata = SubsampledNCMAPSSTestDataset(ds_no, timesteps=n_timesteps)
+        testloader = DataLoader(testdata, batch_size=batch, shuffle=False, num_workers=workers)
 
     return trainloader, testloader
