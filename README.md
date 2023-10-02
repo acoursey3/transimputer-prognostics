@@ -7,7 +7,7 @@ Determining how long a component or system has before it reaches its End of Life
 
 ## How to Use This Repository
 
-This repository contains all code used for the paper. To reproduce experiments, ensure that the [CMAPSS Dataset](https://www.kaggle.com/datasets/behrad3d/nasa-cmaps) is in the top directory in a folder called `CMAPSSData`. Then, train the imputation SSL model in `Imputation Transformer.ipynb` and save the state dict of that model. Finally, train the RUL Transformer model using the saved state dict in `Imputation RUL Transformer.ipynb`. Note that you will have to modify the line of code `z = z + self.positional_embed + imputation_latent` to the appropriate method of incorporating the latent embeddings to try different configutations. This is what worked best for us.
+This repository contains all code used for the paper. To run experiments, ensure that the [CMAPSS Dataset](https://www.kaggle.com/datasets/behrad3d/nasa-cmaps) is in the top directory in a folder called `CMAPSSData`. Then, train the imputation SSL model in `Imputation Transformer.ipynb` and save the state dict of that model. Finally, train the RUL Transformer model using the saved state dict in `Imputation RUL Transformer.ipynb`. Note that you will have to modify the line of code `z = z + self.positional_embed + imputation_latent` to the appropriate method of incorporating the latent embeddings to try different configutations. This is what worked best for us.
 
 ## File Details
 
